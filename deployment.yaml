@@ -1,0 +1,177 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-server
+  template:
+    metadata:
+      labels:
+        app: web-server
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: web-content
+      volumes:
+      - name: web-content
+        persistentVolumeClaim:
+          claimName: nfs-pvc
+
+# Last login: Fri Apr 11 17:02:41 on ttys000
+# ^[[A%
+# ~ ❯ minikube start --cpus=4 --memory=8192 --driver=docker                                           18:09:33
+# 😄  minikube v1.35.0 on Darwin 15.4 (arm64)
+# ✨  Using the docker driver based on user configuration
+# 📌  Using Docker Desktop driver with root privileges
+# 👍  Starting "minikube" primary control-plane node in "minikube" cluster
+# 🚜  Pulling base image v0.0.46 ...
+# 🔥  Creating docker container (CPUs=4, Memory=8192MB) ...
+# 🐳  Preparing Kubernetes v1.32.0 on Docker 27.4.1 ...
+#     ▪ Generating certificates and keys ...
+#     ▪ Booting up control plane ...
+#     ▪ Configuring RBAC rules ...
+# 🔗  Configuring bridge CNI (Container Networking Interface) ...
+# 🔎  Verifying Kubernetes components...
+#     ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+# 🌟  Enabled addons: storage-provisioner, default-storageclass
+# 🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+# ~ ❯ helm repo add kvaps https://kvaps.github.io/charts                                          13s 18:10:14
+# "kvaps" already exists with the same configuration, skipping
+# ~ ❯ helm repo update                                                                                18:10:15
+# Hang tight while we grab the latest from your chart repositories...
+# ...Successfully got an update from the "kvaps" chart repository
+# Update Complete. ⎈Happy Helming!⎈
+# ~ ❯ helm install nfs-server kvaps/nfs-server-provisioner \                                          18:10:18
+#   --set persistence.enabled=true \
+#   --set persistence.size=1Gi \
+#   --set storageClass.name=nfs \
+#   --set storageClass.defaultClass=false
+# NAME: nfs-server
+# LAST DEPLOYED: Fri Apr 11 18:10:23 2025
+# NAMESPACE: default
+# STATUS: deployed
+# REVISION: 1
+# TEST SUITE: None
+# NOTES:
+# The NFS Provisioner service has now been installed.
+
+# A storage class named 'nfs' has now been created
+# and is available to provision dynamic volumes.
+
+# You can use this storageclass by creating a `PersistentVolumeClaim` with the
+# correct storageClassName attribute. For example:
+
+#     ---
+#     kind: PersistentVolumeClaim
+#     apiVersion: v1
+#     metadata:
+#       name: test-dynamic-volume-claim
+#     spec:
+#       storageClassName: "nfs"
+#       accessModes:
+#         - ReadWriteOnce
+#       resources:
+#         requests:
+#           storage: 100Mi
+# ~ ❯ kubectl apply -f .                                                                              18:10:23
+# error: error reading ".": open .Trash: operation not permitted
+# ~ ❯ kubectl apply -f -R .                                                                           18:10:38
+# error: Unexpected args: [.]
+# See 'kubectl apply -h' for help and examples
+# ~ ❯ kubectl apply -f -R .                                                                           18:10:42
+# \error: Unexpected args: [.]
+# See 'kubectl apply -h' for help and examples
+# ~ ❯ cd ~/Studies/LARGE\ SCALE\ COMPUTING/LABS/LAB6\ 11.04.2025                                      18:11:18
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ kubectl apply -f -R .                        18:11:26
+# error: Unexpected args: [.]
+# See 'kubectl apply -h' for help and examples
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ kubectl apply -f -R                          18:11:29
+# error: the path "-R" does not exist
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ ll                                           18:11:32
+# total 96
+# -rw-r--r--@ 1 mikhail.bahdashych  staff   507B Apr 11 17:06 deployment.yaml
+# -rw-r--r--@ 1 mikhail.bahdashych  staff   490B Apr 11 18:02 job.yaml
+# -rw-r--r--@ 1 mikhail.bahdashych  staff    32K Apr 10 16:33 LSC_Lab06_v2025.docx
+# -rw-r--r--@ 1 mikhail.bahdashych  staff   180B Apr 11 17:05 pvc.yaml
+# -rw-r--r--@ 1 mikhail.bahdashych  staff   224B Apr 11 17:07 service.yaml
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ kubectl apply -f -R *.yaml                   18:11:36
+# error: Unexpected args: [deployment.yaml job.yaml pvc.yaml service.yaml]
+# See 'kubectl apply -h' for help and examples
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ kubectl apply -f *.yaml                      18:11:48
+# error: Unexpected args: [job.yaml pvc.yaml service.yaml]
+# See 'kubectl apply -h' for help and examples
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ kubectl apply -f service.yaml                18:11:57
+
+# service/web-server-service created
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ kubectl apply -f deployment.yaml             18:12:00
+# deployment.apps/web-server created
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ kubectl apply -f job.yaml                    18:12:05
+# job.batch/copy-web-content created
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ kubectl apply -f pvc.yaml                    18:12:10
+# persistentvolumeclaim/nfs-pvc created
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ minikube service web-server-service          18:12:14
+# |-----------|--------------------|-------------|---------------------------|
+# | NAMESPACE |        NAME        | TARGET PORT |            URL            |
+# |-----------|--------------------|-------------|---------------------------|
+# | default   | web-server-service |          80 | http://192.168.49.2:30080 |
+# |-----------|--------------------|-------------|---------------------------|
+
+# ❌  Exiting due to SVC_UNREACHABLE: service not available: no running pod for service web-server-service found
+
+# ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+# │                                                                                                                          │
+# │    😿  If the above advice does not help, please let us know:                                                            │
+# │    👉  https://github.com/kubernetes/minikube/issues/new/choose                                                          │
+# │                                                                                                                          │
+# │    Please run `minikube logs --file=logs.txt` and attach logs.txt to the GitHub issue.                                   │
+# │    Please also attach the following file to the GitHub issue:                                                            │
+# │    - /var/folders/6_/b9qmtg5j1pxcmnj2dxsbcd240000gn/T/minikube_service_a0b1d5adf328f93316f8f129c06930fc2227e34a_0.log    │
+# │                                                                                                                          │
+# ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ kubectl get pods -A                          18:12:19
+# NAMESPACE     NAME                                  READY   STATUS      RESTARTS   AGE
+# default       copy-web-content-9n94g                0/1     Completed   0          46s
+# default       nfs-server-nfs-server-provisioner-0   1/1     Running     0          2m33s
+# default       web-server-5f88bc8b68-5r8n8           1/1     Running     0          51s
+# kube-system   coredns-668d6bf9bc-59hf4              1/1     Running     0          2m38s
+# kube-system   etcd-minikube                         1/1     Running     0          2m44s
+# kube-system   kube-apiserver-minikube               1/1     Running     0          2m43s
+# kube-system   kube-controller-manager-minikube      1/1     Running     0          2m43s
+# kube-system   kube-proxy-89n52                      1/1     Running     0          2m38s
+# kube-system   kube-scheduler-minikube               1/1     Running     0          2m43s
+# kube-system   storage-provisioner                   1/1     Running     0          2m42s
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ minikube service web-server-service          18:12:56
+# |-----------|--------------------|-------------|---------------------------|
+# | NAMESPACE |        NAME        | TARGET PORT |            URL            |
+# |-----------|--------------------|-------------|---------------------------|
+# | default   | web-server-service |          80 | http://192.168.49.2:30080 |
+# |-----------|--------------------|-------------|---------------------------|
+# 🏃  Starting tunnel for service web-server-service.
+# |-----------|--------------------|-------------|------------------------|
+# | NAMESPACE |        NAME        | TARGET PORT |          URL           |
+# |-----------|--------------------|-------------|------------------------|
+# | default   | web-server-service |             | http://127.0.0.1:51667 |
+# |-----------|--------------------|-------------|------------------------|
+# 🎉  Opening service default/web-server-service in default browser...
+# ❗  Because you are using a Docker driver on darwin, the terminal needs to be open to run it.
+# ^C✋  Stopping tunnel for service web-server-service.
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ minikube delete                          39s 18:13:46
+# 🔥  Deleting "minikube" in docker ...
+# 🔥  Deleting container "minikube" ...
+# 🔥  Removing /Users/mikhail.bahdashych/.minikube/machines/minikube ...
+# 💀  Removed all traces of the "minikube" cluster.
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ docker ps                                    18:13:53
+# CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯ docker ps -a                                 18:13:54
+# CONTAINER ID   IMAGE                COMMAND                  CREATED       STATUS                  PORTS     NAMES
+# 20425ee82cb1   jupyter/r-notebook   "tini -g -- start-no…"   3 weeks ago   Exited (0) 3 days ago             jupyter-r
+# ~/Studies/LARGE SCALE COMPUTING/LABS/LAB6 11.04.2025 ❯
